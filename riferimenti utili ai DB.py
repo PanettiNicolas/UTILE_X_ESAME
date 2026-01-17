@@ -5,7 +5,7 @@ Musei Torino --> Lab07
 
 Gestione Energia --> Lab08
 
-Tour --> Lab09
+Regioni e Tour --> Lab09
 
 Hub e Tratte --> Lab10
 
