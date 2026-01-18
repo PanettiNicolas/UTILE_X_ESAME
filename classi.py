@@ -1,3 +1,48 @@
+"""
+-----------------------------Classi--------------------------------
+
+!!! Importante importare: from dataclasses import dataclass
+
+@dataclass
+class Classe:
+    attributo_1 : tipo
+    atrributo_2 : tipo
+    attributo_3 : tipo = valore_default
+
+    def __str__(self):                                   <---  Definisce come l'oggetto viene stampato
+        return f"{self.attributo_1} {self.attributo_2}"
+
+    def __hash__(self):                                  <--  Permette di usare l'oggetto come chiave nei dizionari o nei set (Fonfamentale nei GRAFI)
+        return hash(self.attributo_1)
+
+    def __eq__(self, other):                            <-- Permette di verificare quando due oggetti sono uguali
+        if not isinstance(other, Classe):               <-- Verifica che il confronto avvenga tra due oggetti dello stesso tipo
+            return False
+        return self.attributo_1 == other.attributo_1
+
+    def calcola_qualcosa(self):
+        return calcolo
+
+
+>DAO:       for row in cursor:
+                risultato.append(Gene(row['id'], row['nome'], row['cromosoma']))
+
+>MODEL:     Se hai definito __hash__ e __eq__, puoi fare:
+
+            self._grafo.add_node(gene_oggetto)
+
+            !!! NetworkX userà l'oggetto intero come chiave del nodo!
+
+>VIEW:      Se hai definito __str__, il dropdown mostrerà il nome del gene automaticamente
+
+            for g in lista_geni:
+                self._view.dd_geni.options.append(ft.dropdown.Option(data=g, text=str(g)))
+"""
+
+
+
+#Esempio Lab08 (Gestione Energia)
+
 @dataclass()
 class Impianto:
     id: int
