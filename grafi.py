@@ -45,6 +45,7 @@ G.number_of_edges()                 #Restituisce il numero totale di archi creat
 G.edges(data=True)                  #otteniamo una tripla di dati del tipo tratta = (u, v, attributi)
 
 G.degree(n)                         #Restituisce il numero di archi incidenti sul nodo n
+G.degree(n, weight='weight')        #Restituisce la somma totale dei pesi degli archi collegati al nodo
 
 list(G.neighbors(n))                #Restituisce la lista di nodi ADIACENTI a n (Fonfamentale per la ricorsione)
 
