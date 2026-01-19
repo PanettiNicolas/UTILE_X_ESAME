@@ -251,3 +251,65 @@ class Controller:
         min_p, max_p = self._model.get_edges_weight_min_max()
         self._view.lista_visualizzazione_1.controls.append(ft.Text(f"Peso min: {min_p:.2f}, Peso max: {max_p:.2f}"))
         self._view.page.update()
+
+
+# Esempio Bike
+
+class Controller:
+  def __init__(self, view: View, model: Model):
+        self._view = view
+        self._model = model
+  def handle_crea_grafo(self, e):
+        """Gestisce il click sul bottone 'Crea Grafo'"""
+        
+        # 1. RECUPERO DEGLI INPUT
+        # Il .value del dropdown restituisce la 'key' (cioè l'ID della categoria)
+        category_id = self._view.dd_category.value
+        
+        start_date = self._view.dp1.value
+        end_date = self._view.dp2.value
+
+        # 2. CONTROLLI DI VALIDAZIONE (Fondamentali per l'esame!)
+        if category_id is None:
+            self._view.show_alert("Attenzione: Selezionare una categoria!")
+            return
+
+        if start_date is None or end_date is None:
+            self._view.show_alert("Attenzione: Selezionare entrambe le date!")
+            return
+
+        if start_date > end_date:
+            self._view.show_alert("Errore: La data di inizio deve essere precedente alla data di fine.")
+            return
+
+        # 3. CHIAMATA AL MODELLO
+        # Pulisco i risultati precedenti per dare feedback che sto lavorando
+        self._view.txt_risultato.controls.clear()
+        self._view.txt_risultato.controls.append(ft.Text("Creazione grafo in corso...", color="yellow"))
+        self._view.update_page()
+
+        try:
+            # Passo l'ID della categoria e le date al model
+            self._model.build_graph(category_id, start_date, end_date)
+            
+            # 4. RECUPERO I DATI DEL GRAFO CREATO
+            n_nodes, n_edges = self._model.get_graph_details()
+            
+            # 5. AGGIORNO LA VIEW
+            self._view.txt_risultato.controls.clear() # Tolgo il messaggio di attesa
+            
+            if n_nodes == 0:
+                self._view.txt_risultato.controls.append(ft.Text("Nessun nodo trovato con i parametri selezionati."))
+            else:
+                self._view.txt_risultato.controls.append(ft.Text("Grafo creato correttamente!"))
+                self._view.txt_risultato.controls.append(ft.Text(f"Numero di nodi: {n_nodes}"))
+                self._view.txt_risultato.controls.append(ft.Text(f"Numero di archi: {n_edges}"))
+                
+                # Se richiesto, stampa anche i pesi minimi/massimi o altro
+                
+            self._view.update_page()
+
+        except Exception as ex:
+            self._view.txt_risultato.controls.clear()
+            self._view.show_alert(f"Errore durante la creazione del grafo: {ex}")
+            print(ex)
