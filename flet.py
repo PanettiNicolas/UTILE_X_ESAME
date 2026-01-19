@@ -34,9 +34,7 @@ ft.Text              #Metodi chiave: controls.append, clean()        Mostra mesa
 
 ft.ListView          #Metodi chiave: controls.append, clean()        Mostra liste <-- Risultati lunghi
 
-
-
-
+self._view.lst_result.controls.clear()               #Pulisce la lista che verrà data in output
 #Esempio Lab09 (Regioni e Tour)
 
 class Controller:

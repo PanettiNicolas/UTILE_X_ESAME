@@ -19,13 +19,13 @@ Geni e Cromosomi -->Lab13
 
 Dizionario --> Week08
 
-Meteo --> Week09
+Meteo --> Week09                                    Utilities: utilizzo delle funzioni Y/M/D(data) nel DAO
 
-Metro Parigi --> Week10 - Week12 - Week13
+Metro Parigi --> Week10 - Week12 - Week13           Utilities: Creazione Multigrafo pesato
 
-Artsmia --> Week11 - Week13
+Artsmia --> Week11 - Week13                         Utilities: Utilizzo dell'unpacking **, interessante DAO per creazione archi pesati e utilizzo mappaturra direttamente nel DAO
 
-Voli --> Week13
+Voli --> Week13                                     Utilities: Utilizo della mappatura nel DAO e query annidata
 
 ----------SIMULAZIONI ESAME---------
 

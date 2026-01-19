@@ -25,6 +25,10 @@ GROUP BY                 Raggruppa le righe per una o più colonne   -->  !!!Nec
 
 HAVING                   Filtra i risultati DOPO l'aggregazione
 
+BONUS
+
+DAY(data) / MONTH(data) / YEAR(data)           Preleva il valore del giorno/mese/anno da un dato di tipo data
+
 
 Esempio creazione archi:
 
@@ -90,3 +94,151 @@ for c, v in edges.items():           #Cicliamo sulle chiavi(tuple composte dagli
     self.listaPesiArchi.append(v)    #Creiamo una lista con tutti i pesi degli archi che useremo dopo
 
 self.G.add_weighted_edges_from(self.edges)   #Aggiunta lati al grafo
+
+
+#Esempio Week 11 (Artsmia)
+
+class DAO:
+    def __init__(self):
+        pass
+
+    @staticmethod
+    def readObjects():
+        conn = DBConnect.get_connection()
+        result = []
+        cursor = conn.cursor(dictionary=True)
+        query = "SELECT * FROM objects"
+        cursor.execute(query)
+        for row in cursor: # row è un dizionario
+            #result.append(Object(row["object_id"], row["object_name"]))
+            result.append(Object(**row)) # ** fa l'unpacking del dizionario
+
+        cursor.close()
+        conn.close()
+        return result
+
+    @staticmethod
+    def readConnessioni(objects_dict): # Riceve la idMap degli Object
+        conn = DBConnect.get_connection()
+        result = []
+        cursor = conn.cursor(dictionary=True)
+        query = """ SELECT eo1.object_id AS o1, eo2.object_id AS o2, COUNT(*) AS peso
+                    FROM exhibition_objects eo1, exhibition_objects eo2 
+                    WHERE eo1.exhibition_id = eo2.exhibition_id 
+                    AND eo1.object_id < eo2.object_id 
+                    GROUP BY eo1.object_id, eo2.object_id"""
+        cursor.execute(query)
+
+        for row in cursor:
+           o1 = objects_dict[row["o1"]]
+           o2 = objects_dict[row["o2"]]
+           peso = row["peso"]
+           result.append(Connessione(o1, o2, peso))  #costruisce una Connessione
+
+        cursor.close()
+        conn.close()
+        return result # lista di oggetti di tipo Connessione
+
+
+#Esempio Week13 (Voli)
+
+class DAO():
+
+    @staticmethod
+    def getAllAirports():
+        conn = DBConnect.get_connection()
+
+        result = []
+
+        cursor = conn.cursor(dictionary=True)
+        query = """SELECT * from airports a order by a.AIRPORT asc"""
+
+        cursor.execute(query)
+
+        for row in cursor:
+            result.append(Airport(**row))
+
+        cursor.close()
+        conn.close()
+        return result
+
+
+
+    @staticmethod
+    def getNodes(min, dizionarioAeroporti):
+        conn = DBConnect.get_connection()
+
+        result = []
+
+        cursor = conn.cursor(dictionary=True)
+        query = """SELECT tmp.id, tmp.IATA_CODE, count(*) as somma
+                    FROM
+                    (SELECT a.id, a.IATA_CODE, f.AIRLINE_ID, COUNT(*)   
+                    FROM flights f, airports a
+                    WHERE a.id = f.ORIGIN_AIRPORT_ID OR
+                          a.id = f.DESTINATION_AIRPORT_ID 
+                    GROUP BY a.id, a.IATA_CODE, f.AIRLINE_ID) AS tmp
+                    GROUP BY tmp.id, tmp.IATA_CODE 
+                    HAVING somma>= %s """
+
+        cursor.execute(query, (min, ))
+
+        for row in cursor:
+            result.append(dizionarioAeroporti[row["id"]])
+
+        cursor.close()
+        conn.close()
+        return result
+
+    @staticmethod
+    def getEdges(dizionarioAeroporti):
+        conn = DBConnect.get_connection()
+
+        result = []
+
+        cursor = conn.cursor(dictionary=True)
+        query = """SELECT f.ORIGIN_AIRPORT_ID, f.DESTINATION_AIRPORT_ID, COUNT(*) AS voli
+                   FROM flights f 
+                   GROUP BY f.ORIGIN_AIRPORT_ID, f.DESTINATION_AIRPORT_ID """
+
+        cursor.execute(query)
+
+        for row in cursor:
+            idPartenza = row["ORIGIN_AIRPORT_ID"]
+            idAarrivo = row["DESTINATION_AIRPORT_ID"]
+            aPartenza = dizionarioAeroporti[idPartenza]
+            aArrivo = dizionarioAeroporti[idAarrivo]
+            voli = row["voli"]
+            result.append(Connessione(aPartenza, aArrivo, voli))
+
+
+        cursor.close()
+        conn.close()
+        return result
+
+
+    @staticmethod
+    def getEdgesConQueryComplessa(dizionarioAeroporti):
+        conn = DBConnect.get_connection()
+
+        result = []
+
+        cursor = conn.cursor(dictionary=True)
+        query = """SELECT t1.ORIGIN_AIRPORT_ID, t1.DESTINATION_AIRPORT_ID, COALESCE(t1.n, 0) + coalesce(t2.n, 0) as voli
+                    from 
+                    (SELECT f.ORIGIN_AIRPORT_ID , f.DESTINATION_AIRPORT_ID , count(*) as n FROM flights f 
+                    group by f.ORIGIN_AIRPORT_ID , f.DESTINATION_AIRPORT_ID
+                    order by f.ORIGIN_AIRPORT_ID , f.DESTINATION_AIRPORT_ID ) t1
+                    left join 
+                    (SELECT f.ORIGIN_AIRPORT_ID , f.DESTINATION_AIRPORT_ID , count(*) as n FROM flights f 
+                    group by f.ORIGIN_AIRPORT_ID , f.DESTINATION_AIRPORT_ID
+                    order by f.ORIGIN_AIRPORT_ID , f.DESTINATION_AIRPORT_ID ) t2
+                    on t1.ORIGIN_AIRPORT_ID = t2.DESTINATION_AIRPORT_ID and t1.DESTINATION_AIRPORT_ID = t2.ORIGIN_AIRPORT_ID
+                    where t1.ORIGIN_AIRPORT_ID < t1.DESTINATION_AIRPORT_ID or t2.ORIGIN_AIRPORT_ID is null"""
+
+        cursor.execute(query)
+        for row in cursor:
+            result.append(Connessione(dizionarioAeroporti[row["ORIGIN_AIRPORT_ID"]], dizionarioAeroporti[row["DESTINATION_AIRPORT_ID"]], row["voli"]))
+        cursor.close()
+        conn.close()
+        return result
